@@ -54,7 +54,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();          // 只在本機 dev 啟用
+}
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
