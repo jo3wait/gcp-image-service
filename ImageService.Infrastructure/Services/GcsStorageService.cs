@@ -30,9 +30,8 @@ public class GcsStorageService : IStorageService
     
     public async Task<string> UploadAsync(string name, Stream data, string contentType)
     {
-        var obj = $"original/{name}";
-        await _client.UploadObjectAsync(_bucket, obj, contentType, data);
-        return obj;                 // 只回傳 GCS 物件路徑 (不含 bucket)
+        await _client.UploadObjectAsync(_bucket, name, contentType, data);
+        return name;                 // 只回傳 GCS 物件路徑 (不含 bucket)
     }
 
     public string GetDownloadUrl(string objectPath, TimeSpan ttl)
