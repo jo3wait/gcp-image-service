@@ -1,4 +1,4 @@
-using ImageService.Application.Interfaces;
+ï»¿using ImageService.Application.Interfaces;
 using ImageService.Application.Services;
 using ImageService.Domain;
 using ImageService.Infrastructure.Data;
@@ -19,7 +19,7 @@ builder.Services.AddDbContext<ImageDbContext>(opt =>
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IFileService, FileService>();
 
-// Storage Mode ¤Á´«: appsettings  "Storage:Mode" = "Fake" | "GCS"
+// Storage Mode åˆ‡æ›: appsettings  "Storage:Mode" = "Fake" | "GCS"
 var mode = builder.Configuration["Storage:Mode"] ?? "GCS";
 if (mode == "Fake")
     builder.Services.AddSingleton<IStorageService, FakeStorageService>();
@@ -47,6 +47,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// è¨»å†Š CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy
+          .WithOrigins("https://image-frontend-821112036618.asia-east1.run.app/")
+          .AllowAnyHeader()
+          .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
@@ -56,9 +68,11 @@ if (app.Environment.IsDevelopment())
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseHttpsRedirection();          // ¥u¦b¥»¾÷ dev ±Ò¥Î
+    app.UseHttpsRedirection();          // åªåœ¨æœ¬æ©Ÿ dev å•Ÿç”¨
 }
 app.UseAuthentication();
 app.UseAuthorization();
+// ä½¿ç”¨ CORS
+app.UseCors("FrontendPolicy");
 app.MapControllers();
 app.Run();
