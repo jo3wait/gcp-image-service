@@ -60,19 +60,20 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 if (app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();          // 只在本機 dev 啟用
 }
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseRouting();
 // 使用 CORS
 app.UseCors("FrontendPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.Run();
