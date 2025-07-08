@@ -31,17 +31,13 @@ public class FileService : IFileService
             var size = r.Status == "done" && r.TargetSize.HasValue ? 
             $"{r.TargetSize} KB": $"{r.OriSize:N1} KB";   // 留 1 位小數
 
-            string? url = null;
-            if (r.Status == "done" && r.ThumbPath is not null)
-                url = _storage.GetDownloadUrl(r.ThumbPath, TimeSpan.FromHours(2));  // 2 小時有效
-
             return new FileDto(
                 r.Id, 
                 r.FileName, 
                 size, 
                 r.UploadDt, 
                 r.Status ?? "processing",
-                url);
+                r.ThumbPath);
         });
     }
 

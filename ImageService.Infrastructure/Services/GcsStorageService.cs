@@ -1,45 +1,44 @@
-using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using ImageService.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
-using System.Net.Http;
-using System.Security.AccessControl;
 using System.Threading.Tasks;
 
 namespace ImageService.Infrastructure.Services;
 
 public class GcsStorageService : IStorageService
 {
-    private readonly StorageClient _client = StorageClient.Create();
+    private readonly StorageClient _client;
     private readonly string _bucket;
-    private readonly UrlSigner _signer;
 
     public GcsStorageService(IConfiguration cfg)
     {
-        _bucket = cfg["GoogleCloud:BucketName"]!;
+        // Service Account 已加上 storage.objectAdmin（或 storage.objects.create + storage.objects.get）
+        // StorageClient.Create() 會自動用預設憑證 (ADC) 去呼叫 GCS API
         _client = StorageClient.Create();
-
-        // 取得目前執行環境 (Cloud Run SA) 的憑證作 UrlSigner
-        var cred = GoogleCredential.GetApplicationDefault()
-                        .UnderlyingCredential as ServiceAccountCredential
-                   ?? throw new InvalidOperationException("Need service-account credential");
-        _signer = UrlSigner.FromCredential(cred);
+        _bucket = cfg["GoogleCloud:BucketName"]!;
     }
-    
+
     public async Task<string> UploadAsync(string name, Stream data, string contentType)
     {
-        await _client.UploadObjectAsync(_bucket, name, contentType, data);
-        return name;                 // 只回傳 GCS 物件路徑 (不含 bucket)
+        await _client.UploadObjectAsync(
+            bucket: _bucket,
+            objectName: name,
+            contentType: contentType,
+            source: data/*,
+            options: new UploadObjectOptions
+            {
+                PredefinedAcl = PredefinedObjectAcl.PublicRead
+            }*/);
+
+        // 回傳name
+        return name;
     }
 
-    public string GetDownloadUrl(string objectPath, TimeSpan ttl)
+    public string GetDownloadUrl(string objectPath, TimeSpan _)
     {
-        return _signer.Sign(
-            _bucket,
-            objectPath,
-            ttl,
-            HttpMethod.Get);
+        // 若物件設定公開讀取，直接回傳 URL
+        return $"https://storage.googleapis.com/{_bucket}/{objectPath}";
     }
 }
