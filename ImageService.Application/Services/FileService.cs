@@ -28,13 +28,15 @@ public class FileService : IFileService
 
         return rows.Select(r =>
         {
-            var size = r.Status == "done" && r.TargetSize.HasValue ? 
-            $"{r.TargetSize} KB": $"{r.OriSize:N1} KB";   // 痙 1 计
+            var oriSize = $"{r.OriSizeKb:N1} KB";  // 痙 1 计
+            var compSize = r.Status == "done" && r.CompSizeKb !=null ? 
+            $"{r.CompSizeKb} KB": "";   // 痙 1 计
 
             return new FileDto(
                 r.Id, 
-                r.FileName, 
-                size, 
+                r.FileName,
+                oriSize,
+                compSize,
                 r.UploadDt, 
                 r.Status ?? "processing",
                 r.ThumbPath);
@@ -50,19 +52,19 @@ public class FileService : IFileService
             return new(false, "File exceeds 5 MB");
 
         // 1. ミ FILES 魁丁耊
-        var ext = Path.GetExtension(file.FileName);  // e.g. ".png"
+        var ext = Path.GetExtension(file.FileName); // e.g. ".png"
         var ts = DateTime.Now.ToString("yyyyMMddHHmmssfff", CultureInfo.InvariantCulture);
         var baseName = Path.GetFileNameWithoutExtension(file.FileName);
-        var dbFileName = $"{baseName}_{ts}{ext}";
+        var dbFileName = $"{baseName}_{ts}{ext}"; // e.g. "image_20231001123045678.png"
 
         var rec = new FileRecord
         {
             FileName = dbFileName,
             UserId = userId,
-            OriSize = Math.Round((decimal)file.Length / 1024, 1),          // KB1 计
+            OriSizeKb = Math.Round(file.Length / 1024m, 1, MidpointRounding.AwayFromZero), // KB1 计
             Status = "processing",
             Format = ext.TrimStart('.'),
-            TargetSize = 500
+            TargetSize = 500 // 箇砞ヘ夹 500 KB
         };
 
         await _repo.AddAsync(rec);  // SaveChanges  rec.Id

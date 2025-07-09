@@ -19,8 +19,9 @@ public class ImageDbContext : DbContext
             e.Property(f => f.Id).HasColumnName("ID").HasDefaultValueSql("NEWSEQUENTIALID()");
             e.Property(f => f.FileName).HasColumnName("FILE_NAME").HasMaxLength(255).IsRequired();
             e.Property(f => f.UserId).HasColumnName("USER_ID").IsRequired();
-            e.Property(f => f.OriSize).HasColumnName("ORI_SIZE").HasColumnType("DECIMAL(10,1)").IsRequired();
+            e.Property(f => f.OriSizeKb).HasColumnName("ORI_SIZE").HasColumnType("DECIMAL(10,1)").IsRequired();
             e.Property(f => f.TargetSize).HasColumnName("TARGET_SIZE").HasColumnType("INT");
+            e.Property(f => f.CompSizeKb).HasColumnName("COMP_SIZE").HasColumnType("DECIMAL(10,1)");
             e.Property(f => f.Status).HasColumnName("STATUS").HasMaxLength(15);
             e.Property(f => f.Format).HasColumnName("FORMAT").HasMaxLength(10);
             e.Property(f => f.ThumbPath).HasColumnName("THUMB_PATH").HasMaxLength(255);
