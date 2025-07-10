@@ -13,5 +13,5 @@ sequenceDiagram
     IMG->>GCS: upload object “ID.ext”
     GCS-->>IMG: 200 Upload OK
     IMG-->>NG: 200 OK {"success":true}
-    NG-->>U: Refresh list
+    NG-->>U: Render table
 ```
